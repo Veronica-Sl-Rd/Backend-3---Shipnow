@@ -1,34 +1,40 @@
 import userService from "../services/users.service.js";
 
 class UserController {
-    async getAll(req, res) {
+    async findAll(req, res, next) {
         try {
-            const users = await userService.getAll();
-            res.json(users);
+            const users = await userService.findAll();
+            res.json({ status: 'success', payload: users });
         } catch (error) {
-            if (error.status) {return res.status(error.status).json({
-                    error: error.message,});}
-            res.status(500).send("Error del servidor");}
+            next(error);
+        }
     }
 
-    async getById(req, res) {
+    async findById(req, res, next) {
         try {
-            const user = await userService.getById(req.params.uid);
-            res.json(user);
+            const user = await userService.findById(req.params.uid);
+            res.json({ status: 'success', payload: user });
         } catch (error) {
-            if (error.status) {return res.status(error.status).json({
-                    error: error.message,});}
-            res.status(500).send("Error del servidor");}
+            next(error);
+        }
     }
 
-    async create(req, res) {
+    async create(req, res, next) {
         try {
             const newUser = await userService.create(req.body);
-            res.status(201).json(newUser);
+            res.status(201).json({ status: 'success', payload: newUser });
         } catch (error) {
-            if (error.status) {return res.status(error.status).json({
-                    error: error.message,});}
-            res.status(500).send("Error del servidor");}
+            next(error);
+        }
+    }
+
+    async update(req, res, next) {
+        try {
+            const updatedUser = await usersService.update(req.params.id, req.body);
+            res.json({ status: 'success', payload: updatedUser });
+        } catch (error) {
+            next(error);
+        }
     }
 
     async delete(req, res) {
@@ -36,9 +42,8 @@ class UserController {
             await userService.delete(req.params.uid);
             res.json({ message: "Usuario eliminado" });
         } catch (error) {
-            if (error.status) {return res.status(error.status).json({
-                    error: error.message,});}
-            res.status(500).send("Error del servidor");}
+            next(error);
+        }
     }
 }
 

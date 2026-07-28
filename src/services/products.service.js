@@ -1,5 +1,6 @@
 import productRepository from "../repositories/products.repository.js";
 import { PRODUCT_STATUS } from "../constants/index.js";
+import AppError from '../utils/errors.js';
 
 class ProductService {
     async getAll() {
@@ -8,29 +9,21 @@ class ProductService {
     async getById(id) {
         const product = await productRepository.getById(id);
         if (!product) {
-            throw {
-                status: 404,
-                message: "Producto no encontrado",
-            };}
+            throw new AppError('Producto no encontrado', 404);
+        }
         return product;}
 
     async create(productData) {
         const { name, description, price, stock, category, status } = productData;
         if (!name || price === undefined || stock === undefined) {
-            throw {
-                status: 400,
-                message: "Faltan datos obligatorios (name, price, stock)",
-            };}
+            throw new AppError('Faltan datos obligatorios', 400);
+        }
         if (price < 0) {
-            throw {
-                status: 400,
-                message: "El precio no puede ser negativo",
-            };}
+            throw new AppError('El precio no puede ser negativo', 400);
+        }
         if (stock < 0) {
-            throw {
-                status: 400,
-                message: "El stock no puede ser negativo",
-            };}
+            throw new AppError('Elstock no puede ser negativo', 400);
+        }
         return await productRepository.create({
             name,
             description,
@@ -47,20 +40,14 @@ class ProductService {
     const { name, description, price, stock, category, status } = productData;
     const product = await productRepository.getById(id);
     if (!product) {
-        throw {
-            status: 404,
-            message: "Producto no encontrado",
-        };}
+        throw new AppError('Producto no encontrado', 404);
+        }
     if (price !== undefined && price < 0) {
-        throw {
-            status: 400,
-            message: "El precio no puede ser negativo",
-        };}
+        throw new AppError('El precio no puede ser negativo', 400);
+        }
     if (stock !== undefined && stock < 0) {
-        throw {
-            status: 400,
-            message: "El stock no puede ser negativo",
-        };}
+        throw new AppError('Elstock no puede ser negativo', 400);
+        }
     if (name !== undefined) product.name = name;
     if (description !== undefined) product.description = description;
     if (price !== undefined) product.price = price;
@@ -77,10 +64,8 @@ class ProductService {
     async delete(id) {
         const product = await productRepository.delete(id);
         if (!product) {
-            throw {
-                status: 404,
-                message: "Producto no encontrado",
-            };}
+            throw new AppError('Producto no encontrado', 404);
+        }
         return product;}
 }
 

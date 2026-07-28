@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 import app from "./app.js";
-import { env } from "./config/index.js";
+import config from "./config/index.js";
 
-mongoose.connect(env.MONGODB_URI)
+mongoose.connect(config.MONGODB_URI)
   .then(() => {
     console.log('Conectado a MongoDB');
-    app.listen(env.PORT, () => {
-      console.log(`Servidor corriendo en puerto ${env.PORT}`);
+    app.listen(config.PORT, () => {
+      console.log(`Servidor corriendo en puerto ${config.PORT}`);
     });
   })
   .catch((error) => {
