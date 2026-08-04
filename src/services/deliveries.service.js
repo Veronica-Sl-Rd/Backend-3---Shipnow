@@ -1,4 +1,5 @@
-import AppError from '../utils/errors.js';
+import { ERROR_CODES } from '../constants/error.constants.js';
+import CustomError from '../utils/errors.js';
 
 export default class DeliveriesService {
     constructor(deliveriesRepository, ordersRepository, usersRepository, weatherApi, driverRepository) {
@@ -16,7 +17,7 @@ export default class DeliveriesService {
     async findById(id) {
         const delivery = await this.deliveriesRepository.findById(id);
         if (!delivery) {
-            throw new AppError('Entrega no encontrada', 404);
+            throw new CustomError(ERROR_CODES.DELIVERY_NOT_FOUND);
         }
         return delivery;
     }
@@ -24,13 +25,13 @@ export default class DeliveriesService {
     async create(deliveryData) {
         const order = await this.ordersRepository.findById(deliveryData.order);
         if (!order) {
-            throw new AppError('El pedido especificado no existe', 400);
+            throw new CustomError(ERROR_CODES.ORDER_NOT_FOUND);
         }
 
         if (deliveryData.driver) {
             const driver = await this.usersRepository.findById(deliveryData.driver);
             if (!driver) {
-                throw new AppError('El repartidor especificado no existe', 400);
+                throw new CustomError(ERROR_CODES.DRIVER_NOT_FOUND);
             }
         }
 
@@ -72,7 +73,7 @@ export default class DeliveriesService {
     async update(id, deliveryData) {
         const updated = await this.deliveriesRepository.update(id, deliveryData);
         if (!updated) {
-            throw new AppError('Entrega no encontrada', 404);
+            throw new CustomError(ERROR_CODES.DELIVERY_NOT_FOUND);
         }
         return updated;
     }
@@ -80,7 +81,7 @@ export default class DeliveriesService {
     async delete(id) {
         const deleted = await this.deliveriesRepository.delete(id);
         if (!deleted) {
-            throw new AppError('Entrega no encontrada', 404);
+            throw new CustomError(ERROR_CODES.DELIVERY_NOT_FOUND);
         }
         return deleted;
     }

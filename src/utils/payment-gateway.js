@@ -1,3 +1,6 @@
+import CustomError from "./errors.js";
+import { ERROR_CODES } from "../constants/error.constants.js";
+
 const PAYMENT_API_URL = 'https://api.stripe.com/v1/charges';
 
 export async function charge(amount, paymentMethod) {
@@ -11,7 +14,7 @@ export async function charge(amount, paymentMethod) {
     });
 
     if (!response.ok) {
-        throw new Error(`Payment failed: ${response.statusText}`);
+        throw new CustomError(ERROR_CODES.PAYMENT_REJECTED);
     }
 
     const data = await response.json();

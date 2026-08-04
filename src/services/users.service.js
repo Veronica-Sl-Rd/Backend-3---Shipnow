@@ -1,6 +1,7 @@
 import userRepository from "../repositories/users.repository.js";
 import { USER_ROLES } from "../constants/index.js";
-import AppError from '../utils/errors.js';
+import CustomError from '../utils/errors.js';
+import { ERROR_CODES } from "../constants/error.constants.js";
 
 class UserService {
     async findAll() {
@@ -10,7 +11,7 @@ class UserService {
     async findById(id) {
         const user = await userRepository.findById(id);
         if (!user) {
-            throw new AppError('Usuario no encontrado', 404);
+            throw new CustomError(ERROR_CODES.USER_NOT_FOUND);
         }
         return user;
     }
@@ -18,14 +19,14 @@ class UserService {
     async create(userData) {
         const { firstName, lastName, email, password, role } = userData;
         if (!firstName || !lastName || !email || !password) {
-            throw new AppError('Faltan datos obligatorios', 400);
+            throw new CustomError(ERROR_CODES.VALIDATION_ERROR);
         }
         if (role === USER_ROLES.ADMIN) {
-            throw new AppError('No puedes crear admin', 403);
+            throw new CustomError(ERROR_CODES.ADMIN_CREATION_FORBIDDEN);
         }
         const existingUser = await userRepository.findByEmail(email);
         if (existingUser) {
-            throw new AppError('El email ya está registrado', 409);
+            throw new CustomError(ERROR_CODES.USER_ALREADY_EXIST);
         }
         return await userRepository.create({
             firstName,
@@ -39,7 +40,7 @@ class UserService {
     async update(id, userData) {
         const updatedUser = await usersRepository.update(id, userData);
         if (!updatedUser) {
-            throw new AppError('Usuario no encontrado', 404);
+            throw new CustomError(ERROR_CODES.USER_NOT_FOUND);
         }
         return updatedUser;
     }
@@ -47,7 +48,7 @@ class UserService {
     async delete(id) {
         const user = await userRepository.delete(id);
         if (!user) {
-            throw new AppError('Usuario no encontrado', 404);
+            throw new CustomError(ERROR_CODES.USER_NOT_FOUND);
         }
         return user;
     }

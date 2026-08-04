@@ -1,9 +1,18 @@
+import CustomError from "../utils/errors.js";
+import { ERROR_CODES } from "../constants/error.constants.js";
+
 import mocksRepository from "../repositories/mocks.repository.js";
 import {generateMockUser, generateMockDriver} from "../mocks/users.mock.js";
 import { generateMockOrder } from "../mocks/orders.mock.js";
 import { generateMockDelivery } from "../mocks/deliveries.mock.js";
 
 class MocksService {
+
+    validateQuantity(quantity) {
+        if (!Number.isInteger(quantity) || quantity <= 0 || quantity > 1000) {
+            throw new CustomError(ERROR_CODES.INVALID_MOCK_QUANTITY);
+        }
+    }
 
     generateUsers(quantity = 50) {
         const users = [];
@@ -41,6 +50,7 @@ class MocksService {
     }
 
     async getMockUsers(quantity = 50) {
+        this.validateQuantity(quantity);
     return {
         customers: this.generateUsers(quantity),
         drivers: this.generateDrivers(quantity)
@@ -48,9 +58,9 @@ class MocksService {
     }
 
     async getMockOrders(quantity = 50) {
+        this.validateQuantity(quantity);
 
         const customers = this.generateUsers(quantity);
-
         const customersWithIds = customers.map((customer, index) => ({
             ...customer,
             _id: `mock-user-${index}`
@@ -60,7 +70,9 @@ class MocksService {
     }
 
     async generateData(quantity = 50) {
+        this.validateQuantity(quantity);
 
+        try {
         const customers = this.generateUsers(quantity);
         const drivers = this.generateDrivers(quantity);
 
@@ -79,8 +91,11 @@ class MocksService {
             drivers: savedDrivers.length,
             orders: savedOrders.length,
             deliveries: savedDeliveries.length
-        };
+        }; } catch (error) {
+            throw new CustomError(ERROR_CODES.MOCK_GENERATION_FAILED);
+        }
     }
 }
+
 
 export default new MocksService();

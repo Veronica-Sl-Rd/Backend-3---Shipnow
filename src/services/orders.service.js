@@ -1,4 +1,5 @@
-import AppError from '../utils/errors.js';
+import { ERROR_CODES } from '../constants/error.constants.js';
+import CustomError from '../utils/errors.js';
 
 export default class OrdersService {
     constructor(ordersRepository, usersRepository, paymentGateway, notificationService) {
@@ -15,7 +16,7 @@ export default class OrdersService {
     async findById(id) {
         const order = await this.ordersRepository.findById(id);
         if (!order) {
-            throw new AppError('Pedido no encontrado', 404);
+            throw new CustomError(ERROR_CODES.ORDER_NOT_FOUND);
         }
         return order;
     }
@@ -23,11 +24,11 @@ export default class OrdersService {
     async create(orderData) {
         const customer = await this.usersRepository.findById(orderData.customer);
         if (!customer) {
-            throw new AppError('El cliente especificado no existe', 400);
+            throw new CustomError(ERROR_CODES.CUSTOMER_NOT_FOUND);
         }
 
         if (!orderData.items || orderData.items.length === 0) {
-            throw new AppError('El pedido debe tener al menos un item', 400);
+            throw new CustomError(ERROR_CODES.INVALID_ORDER);
         }
 
         const total = orderData.items.reduce(
@@ -37,7 +38,7 @@ export default class OrdersService {
         const payment = await this.paymentGateway.charge(total, orderData.paymentMethod || 'card');
 
         if (!payment.success) {
-            throw new AppError('Pago rechazado', 402);
+            throw new CustomError(ERROR_CODES.PAYMENT_REJECTED);
         }
 
         const saved = await this.ordersRepository.create({ ...orderData, total, status: 'created' });
@@ -48,7 +49,6 @@ export default class OrdersService {
                 `Tu pedido #${saved._id} fue confirmado`
             );
         } catch (e) {
-            // La notificación no bloquea la creación del pedido
         }
 
         return saved;
@@ -57,7 +57,7 @@ export default class OrdersService {
     async update(id, orderData) {
         const updated = await this.ordersRepository.update(id, orderData);
         if (!updated) {
-            throw new AppError('Pedido no encontrado', 404);
+            throw new CustomError(ERROR_CODES.ORDER_NOT_FOUND);
         }
         return updated;
     }
@@ -65,7 +65,7 @@ export default class OrdersService {
     async delete(id) {
         const deleted = await this.ordersRepository.delete(id);
         if (!deleted) {
-            throw new AppError('Pedido no encontrado', 404);
+            throw new CustomError(ERROR_CODES.ORDER_NOT_FOUND);
         }
         return deleted;
     }
@@ -73,10 +73,10 @@ export default class OrdersService {
     async cancelOrder(id) {
         const order = await this.ordersRepository.findById(id);
         if (!order) {
-            throw new AppError('Pedido no encontrado', 404);
+            throw new CustomError(ERROR_CODES.ORDER_NOT_FOUND);
         }
         if (order.status === 'delivered') {
-            throw new AppError('No se puede cancelar un pedido ya entregado', 400);
+            throw new CustomError(ERROR_CODES.ORDER_ALREADY_DELIVERED);
         }
         return this.ordersRepository.update(id, { status: 'cancelled' });
     }

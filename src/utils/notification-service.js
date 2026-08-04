@@ -1,3 +1,6 @@
+import CustomError from "./errors.js";
+import { ERROR_CODES } from "../constants/error.constants.js";
+
 const NOTIFICATION_API_URL = 'https://api.notifications.com/v1/send';
 
 export async function sendNotification(userId, message) {
@@ -8,7 +11,7 @@ export async function sendNotification(userId, message) {
     });
 
     if (!response.ok) {
-        throw new Error(`Notification failed: ${response.statusText}`);
+        throw new CustomError(ERROR_CODES.NOTIFICATION_FAILED);
     }
 
     return { sent: true, userId, message };

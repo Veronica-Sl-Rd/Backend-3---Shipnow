@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import apiRouter from './routes/index.js';
+import { errorHandler } from './middlewares/errorHandler.js' ;
 
 const app = express();
 
@@ -18,10 +19,6 @@ app.use((req, res) => {
     res.status(404).json({ status: 'error', message: 'Ruta no encontrada' });
 });
 
-app.use((err, req, res, next) => {
-    const statusCode = err.statusCode || 500;
-    const message = err.message || 'Error interno del servidor';
-    res.status(statusCode).json({ status: 'error', message });
-});
+app.use(errorHandler);
 
 export default app;

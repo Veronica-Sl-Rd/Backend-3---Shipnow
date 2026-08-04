@@ -27,7 +27,7 @@ En el Módulo 2 se incorporó un sistema de mocking, generación de datos de pru
 1. Clonar el repositorio
 
 ```bash
-git clone <URL_DEL_REPOSITORIO>
+git clone https://github.com/Veronica-Sl-Rd/Backend-3---Shipnow.git
 ```
 
 2. Ingresar a la carpeta del proyecto
