@@ -178,7 +178,8 @@ Se utilizan los siguientes niveles:
 - warning: situaciones inesperadas o advertencias que no interrumpen la ejecución.
 - error: errores que afectan una operación pero permiten continuar ejecutando la aplicación.
 - fatal: fallas críticas que pueden impedir el funcionamiento correcto del sistema.
-- Diferenciación por entorno
+
+### Diferenciación por entorno
 
 El comportamiento del logger depende de la variable NODE_ENV.
 
@@ -198,7 +199,7 @@ logs/
 
 Se generan archivos de aplicación y archivos específicos para errores.
 
-La aplicación utiliza winston-daily-rotate-file para realizar una rotación automática de los archivos de log.
+La aplicación utiliza **winston-daily-rotate-file** para realizar una rotación automática de los archivos de log.
 
 Los archivos se organizan por fecha y se conserva un historial limitado para evitar que los registros crezcan indefinidamente.
 
