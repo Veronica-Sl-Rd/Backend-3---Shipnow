@@ -37,7 +37,7 @@ class UserController {
         }
     }
 
-    async delete(req, res) {
+    async delete(req, res, next) {
         try {
             await userService.delete(req.params.uid);
             res.json({ message: "Usuario eliminado" });

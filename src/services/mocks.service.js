@@ -5,32 +5,30 @@ import mocksRepository from "../repositories/mocks.repository.js";
 import {generateMockUser, generateMockDriver} from "../mocks/users.mock.js";
 import { generateMockOrder } from "../mocks/orders.mock.js";
 import { generateMockDelivery } from "../mocks/deliveries.mock.js";
+import logger from "../utils/logger.js";
 
 class MocksService {
 
     validateQuantity(quantity) {
         if (!Number.isInteger(quantity) || quantity <= 0 || quantity > 1000) {
+            logger.warning(`Cantidad inválida de mocks solicitada: ${quantity}`);
             throw new CustomError(ERROR_CODES.INVALID_MOCK_QUANTITY);
         }
     }
 
     generateUsers(quantity = 50) {
         const users = [];
-
         for (let i = 0; i < quantity; i++) {
             users.push(generateMockUser(i));
         }
-
         return users;
     }
 
     generateDrivers(quantity = 50) {
         const drivers = [];
-
         for (let i = 0; i < quantity; i++) {
             drivers.push(generateMockDriver(i));
         }
-
         return drivers;
     }
 
@@ -86,12 +84,16 @@ class MocksService {
 
         const savedDeliveries = await mocksRepository.insertDeliveries(deliveries);
 
+        logger.info(`Datos mock generados correctamente: ${savedCustomers.length} usuarios, ${savedDrivers.length} repartidores, ${savedOrders.length} pedidos y ${savedDeliveries.length} entregas`
+        );
+
         return {
             users: savedCustomers.length,
             drivers: savedDrivers.length,
             orders: savedOrders.length,
             deliveries: savedDeliveries.length
         }; } catch (error) {
+            logger.error(`Falló la generación de datos mock: ${error.message}`);
             throw new CustomError(ERROR_CODES.MOCK_GENERATION_FAILED);
         }
     }

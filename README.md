@@ -2,11 +2,16 @@
 
 ## Descripción
 
-Este proyecto corresponde a las pre-entregas de los Módulos 1 y 2 de Backend III (Testing y Escalabilidad).
+Este proyecto corresponde a las pre-entregas de los Módulos 1, 2, 3 y 4 de Backend III (Testing y Escalabilidad).
 
 En el Módulo 1 se refactorizó la API utilizando una arquitectura por capas (Controller - Service - Repository), para las entidades **Products** y **Users**, centralizando además la configuración del entorno y las constantes de la aplicación.
 
 En el Módulo 2 se incorporó un sistema de mocking, generación de datos de prueba y tests unitarios utilizando Jest, aplicando distintos tipos de dobles de prueba (Mocks, Stubs, Fakes y Data Fixtures). 
+
+En el Módulo 3 se incorporó un sistema centralizado de manejo de errores mediante errores personalizados, códigos de error, un diccionario de errores y un middleware global, aplicándolo también al módulo de mocking.
+
+En el Módulo 4 se incorporó un sistema profesional de logging utilizando **Winston**, con distintos niveles de registro, persistencia de logs en archivos, rotación automática y diferenciación del comportamiento según el entorno de ejecución.
+
 
 ---
 
@@ -129,6 +134,98 @@ El sistema de generación de datos utiliza la arquitectura por capas implementad
 Los datos se generan mediante un Service especializado y se almacenan utilizando Repositories, evitando que los Controllers accedan directamente a los modelos de Mongoose.
 
 Se utilizan constantes centralizadas para roles, estados y prioridades, evitando valores hardcodeados.
+
+---
+
+## Manejo centralizado de errores
+
+El proyecto cuenta con un sistema centralizado de manejo de errores para evitar respuestas de error dispersas en los Controllers y Routes.
+
+El sistema está compuesto por:
+
+CustomError: clase para representar errores personalizados de la aplicación.
+Error Codes: constantes que identifican cada tipo de error.
+Error Dictionary: define el código HTTP y el mensaje correspondiente a cada error.
+Error Handler: middleware global encargado de transformar los errores en respuestas HTTP uniformes.
+
+Los errores se detectan en la capa correspondiente, principalmente dentro de los Services, y son derivados mediante next(error) hasta el middleware global.
+
+Las respuestas de error mantienen una estructura uniforme:
+
+```text
+{
+  "status": "error",
+  "error": "ERROR_CODE",
+  "message": "Descripción del error"
+}
+```
+
+Este sistema también se aplica al módulo de mocking para controlar errores relacionados con cantidades inválidas y fallas durante la carga de datos en MongoDB.
+
+---
+
+## Sistema de Logging
+
+El proyecto incorpora un sistema centralizado de logging utilizando Winston.
+
+El logger se encuentra configurado en un módulo independiente y puede ser utilizado desde los distintos componentes de la aplicación sin repetir la configuración.
+
+Se utilizan los siguientes niveles:
+
+- debug: información detallada útil principalmente durante el desarrollo.
+- http: eventos relacionados con solicitudes HTTP.
+- info: información general sobre el funcionamiento de la aplicación.
+- warning: situaciones inesperadas o advertencias que no interrumpen la ejecución.
+- error: errores que afectan una operación pero permiten continuar ejecutando la aplicación.
+- fatal: fallas críticas que pueden impedir el funcionamiento correcto del sistema.
+- Diferenciación por entorno
+
+El comportamiento del logger depende de la variable NODE_ENV.
+
+En desarrollo se habilitan logs más detallados, incluyendo el nivel debug.
+
+En producción se utiliza un nivel más controlado, registrando principalmente eventos info, warning, error y fatal.
+
+---
+
+### Persistencia y rotación de logs
+
+Los logs se muestran por consola y también se almacenan en archivos dentro de la carpeta:
+
+```text
+logs/
+```
+
+Se generan archivos de aplicación y archivos específicos para errores.
+
+La aplicación utiliza winston-daily-rotate-file para realizar una rotación automática de los archivos de log.
+
+Los archivos se organizan por fecha y se conserva un historial limitado para evitar que los registros crezcan indefinidamente.
+
+Los archivos generados por el sistema de logging no se incluyen en el repositorio de GitHub y la carpeta logs/ se encuentra contemplada en .gitignore.
+
+---
+
+### Endpoint de prueba del logger
+
+Se incorporó un endpoint específico para verificar el funcionamiento de todos los niveles del sistema de logging:
+
+```text
+GET /api/logger/test
+```
+Este endpoint tiene como objetivo facilitar la comprobación del sistema de logging durante el desarrollo y la evaluación del proyecto.
+
+---
+
+### Integración entre Logging y manejo de errores
+
+El sistema de logging se encuentra integrado con el middleware global de errores.
+
+Los errores esperados o relacionados con reglas de negocio pueden registrarse como advertencias, mientras que los errores inesperados del servidor se registran como errores.
+
+Las fallas críticas de configuración o funcionamiento pueden registrarse mediante el nivel fatal.
+
+El logger complementa al sistema de manejo de errores, pero no reemplaza la respuesta HTTP enviada al cliente.
 
 ---
 

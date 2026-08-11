@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import apiRouter from './routes/index.js';
 import { errorHandler } from './middlewares/errorHandler.js' ;
+import logger from './utils/logger.js';
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use((req, res) => {
+    logger.warning(`Ruta inexistente: ${req.method} ${req.originalUrl}`);
     res.status(404).json({ status: 'error', message: 'Ruta no encontrada' });
 });
 

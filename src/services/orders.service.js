@@ -1,5 +1,6 @@
 import { ERROR_CODES } from '../constants/error.constants.js';
 import CustomError from '../utils/errors.js';
+import logger from "../utils/logger.js"
 
 export default class OrdersService {
     constructor(ordersRepository, usersRepository, paymentGateway, notificationService) {
@@ -26,7 +27,6 @@ export default class OrdersService {
         if (!customer) {
             throw new CustomError(ERROR_CODES.CUSTOMER_NOT_FOUND);
         }
-
         if (!orderData.items || orderData.items.length === 0) {
             throw new CustomError(ERROR_CODES.INVALID_ORDER);
         }
@@ -36,13 +36,12 @@ export default class OrdersService {
         );
 
         const payment = await this.paymentGateway.charge(total, orderData.paymentMethod || 'card');
-
         if (!payment.success) {
             throw new CustomError(ERROR_CODES.PAYMENT_REJECTED);
         }
 
         const saved = await this.ordersRepository.create({ ...orderData, total, status: 'created' });
-
+        logger.info(`Pedido creado correctamente: ${saved._id}`);
         try {
             await this.notificationService.sendNotification(
                 saved.customer,
@@ -50,7 +49,6 @@ export default class OrdersService {
             );
         } catch (e) {
         }
-
         return saved;
     }
 
