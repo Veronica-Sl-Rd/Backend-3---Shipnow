@@ -143,10 +143,10 @@ El proyecto cuenta con un sistema centralizado de manejo de errores para evitar 
 
 El sistema está compuesto por:
 
-CustomError: clase para representar errores personalizados de la aplicación.
-Error Codes: constantes que identifican cada tipo de error.
-Error Dictionary: define el código HTTP y el mensaje correspondiente a cada error.
-Error Handler: middleware global encargado de transformar los errores en respuestas HTTP uniformes.
+- **CustomError:** clase para representar errores personalizados de la aplicación.
+- **Error Codes:** constantes que identifican cada tipo de error.
+- **Error Dictionary:** define el código HTTP y el mensaje correspondiente a cada error.
+- **Error Handler:** middleware global encargado de transformar los errores en respuestas HTTP uniformes.
 
 Los errores se detectan en la capa correspondiente, principalmente dentro de los Services, y son derivados mediante next(error) hasta el middleware global.
 
