@@ -2,9 +2,9 @@
 
 ## Descripción
 
-Este proyecto corresponde a las pre-entregas de los Módulos 1, 2, 3 y 4 de Backend III (Testing y Escalabilidad).
+Este proyecto corresponde a las pre-entregas de los Módulos 1, 2, 3, 4 y 5 de Backend III (Testing y Escalabilidad).
 
-En el Módulo 1 se refactorizó la API utilizando una arquitectura por capas (Controller - Service - Repository), para las entidades **Products** y **Users**, centralizando además la configuración del entorno y las constantes de la aplicación.
+En el Módulo 1 se refactorizó la API utilizando una arquitectura por capas (Controller - Service - Repository), para las distintas entidades del sistema y centralizando además la configuración del entorno y las constantes de la aplicación.
 
 En el Módulo 2 se incorporó un sistema de mocking, generación de datos de prueba y tests unitarios utilizando Jest, aplicando distintos tipos de dobles de prueba (Mocks, Stubs, Fakes y Data Fixtures). 
 
@@ -12,6 +12,7 @@ En el Módulo 3 se incorporó un sistema centralizado de manejo de errores media
 
 En el Módulo 4 se incorporó un sistema profesional de logging utilizando **Winston**, con distintos niveles de registro, persistencia de logs en archivos, rotación automática y diferenciación del comportamiento según el entorno de ejecución.
 
+En el Módulo 5 se incorporó documentación interactiva de la API utilizando Swagger y OpenAPI, incluyendo schemas reutilizables, documentación de endpoints y respuestas de error.
 
 ---
 
@@ -24,6 +25,11 @@ En el Módulo 4 se incorporó un sistema profesional de logging utilizando **Win
 - Jest
 - dotenv
 - cors
+- Winston
+- Swagger
+- OpenAPI
+- swagger-jsdoc
+- swagger-ui-express
 
 ---
 
@@ -143,10 +149,10 @@ El proyecto cuenta con un sistema centralizado de manejo de errores para evitar 
 
 El sistema está compuesto por:
 
-CustomError: clase para representar errores personalizados de la aplicación.
-Error Codes: constantes que identifican cada tipo de error.
-Error Dictionary: define el código HTTP y el mensaje correspondiente a cada error.
-Error Handler: middleware global encargado de transformar los errores en respuestas HTTP uniformes.
+**CustomError:** clase para representar errores personalizados de la aplicación.
+**Error Codes:** constantes que identifican cada tipo de error.
+**Error Dictionary:** define el código HTTP y el mensaje correspondiente a cada error.
+**Error Handler:** middleware global encargado de transformar los errores en respuestas HTTP uniformes.
 
 Los errores se detectan en la capa correspondiente, principalmente dentro de los Services, y son derivados mediante next(error) hasta el middleware global.
 
@@ -178,7 +184,8 @@ Se utilizan los siguientes niveles:
 - warning: situaciones inesperadas o advertencias que no interrumpen la ejecución.
 - error: errores que afectan una operación pero permiten continuar ejecutando la aplicación.
 - fatal: fallas críticas que pueden impedir el funcionamiento correcto del sistema.
-- Diferenciación por entorno
+
+### Diferenciación por entorno
 
 El comportamiento del logger depende de la variable NODE_ENV.
 
@@ -228,5 +235,44 @@ Las fallas críticas de configuración o funcionamiento pueden registrarse media
 El logger complementa al sistema de manejo de errores, pero no reemplaza la respuesta HTTP enviada al cliente.
 
 ---
+
+## Documentación de la API
+
+La API cuenta con documentación interactiva utilizando **Swagger UI** y **OpenAPI 3.0**.
+
+La documentación puede consultarse desde:
+
+```text
+http://localhost:8080/api/docs
+```
+
+Swagger permite consultar y probar los endpoints directamente desde la interfaz web.
+
+La documentación se encuentra organizada mediante tags según los principales módulos de la aplicación:
+
+- Users: gestión de usuarios.
+- Orders: gestión de pedidos.
+- Deliveries: gestión de entregas.
+- Mocks: generación e inserción de datos de prueba.
+- Logger: endpoint utilizado para validar los distintos niveles del sistema de logging.
+
+Se definieron schemas reutilizables para evitar duplicar estructuras dentro de la documentación:
+Los schemas permiten mantener una documentación consistente con los modelos y las respuestas reales de la API.
+
+También se documentaron las principales respuestas de error utilizadas por la API.
+
+### Organización de la documentación
+
+La configuración principal de Swagger se encuentra separada de la lógica de la aplicación.
+
+Los archivos de documentación se encuentran dentro de:
+
+```text
+src/docs/
+```
+
+Los endpoints se documentan mediante archivos YAML, mientras que swagger-jsdoc se utiliza para generar la especificación OpenAPI y swagger-ui-express permite visualizar y probar la documentación desde el navegador.
+
+--- 
 
 Pre-entrega Backend III - Coderhouse

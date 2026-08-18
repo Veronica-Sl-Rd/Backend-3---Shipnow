@@ -1,0 +1,202 @@
+components:
+
+  schemas:
+
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "67d123456789abcdef123456"
+        firstName:
+          type: string
+          example: "Veronica"
+        lastName:
+          type: string
+          example: "Rodriguez"
+        email:
+          type: string
+          format: email
+          example: "vero@example.com"
+        password:
+          type: string
+          example: "*******"
+        role:
+          type: string
+          enum: [admin, customer, driver, store]
+          example: customer
+        city:
+          type: string
+          example: "Buenos Aires"
+        available:
+          type: boolean
+          example: true
+        vehicle:
+          type: string
+          enum: [bike, motorcycle, car]
+          example: motorcycle
+        documents:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "DNI"
+              reference:
+                type: string
+                example: "document-123"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    OrderItem:
+      type: object
+      required: [name, quantity, price]
+      properties:
+        name:
+          type: string
+          example: "Hamburguesa"
+        quantity:
+          type: integer
+          minimum: 1
+          example: 2
+        price:
+          type: number
+          minimum: 0
+          example: 1500
+
+    Order:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "67d123456789abcdef123456"
+        customer:
+          type: string
+          example: "67d123456789abcdef123456"
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/OrderItem"
+        deliveryAddress:
+          type: string
+          example: "Av. Siempre Viva 1234"
+        total:
+          type: number
+          example: 3000
+        status:
+          type: string
+          enum: [created, assigned, picked_up, in_transit, delivered, cancelled]
+          example: created
+        priority:
+          type: string
+          enum: [low, normal, high]
+          example: normal
+        delivery:
+          type: string
+          nullable: true
+          example: "67d123456789abcdef654321"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Delivery:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: "67d123456789abcdef123456"
+        order:
+          type: string
+          example: "67d123456789abcdef123456"
+        driver:
+          type: string
+          nullable: true
+          example: "67d123456789abcdef654321"
+        status:
+          type: string
+          enum: [pending, assigned, in_transit, delivered]
+          example: pending
+        priority:
+          type: string
+          enum: [low, normal, high]
+          example: normal
+        assignedAt:
+          type: string
+          format: date-time
+          nullable: true
+        deliveredAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    DeliveryInput:
+      type: object
+      required:
+        - order
+      properties:
+        order:
+          type: string
+          description: ID del pedido asociado a la entrega
+          example: "67c8f123456789abcdef1234"
+        driver:
+          type: string
+          nullable: true
+          description: ID del repartidor asignado
+          example: "67c8f987654321abcdef5678"
+        status:
+          type: string
+          enum: [pending, assigned, in_transit, delivered]
+          default: pending
+          description: Estado actual de la entrega
+        priority:
+          type: string
+          enum: [low, normal, high]
+          default: normal
+          description: Prioridad de la entrega
+        assignedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Fecha y hora de asignación del repartidor
+        deliveredAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Fecha y hora de entrega
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        error:
+          type: string
+          example: ORDER_NOT_FOUND
+        message:
+          type: string
+          example: Pedido no encontrado
+
+    SuccessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        payload:
+          type: object

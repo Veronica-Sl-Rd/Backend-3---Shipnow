@@ -1,0 +1,191 @@
+paths:
+
+  /api/deliveries:
+    get:
+      tags:
+        - Deliveries
+      summary: Obtener todas las entregas
+      description: Devuelve todas las entregas registradas.
+      responses:
+        '200':
+          description: Lista de entregas obtenida correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      tags:
+        - Deliveries
+      summary: Crear una entrega
+      description: Crea una nueva entrega asociada a un pedido y, opcionalmente, a un repartidor.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeliveryInput'
+      responses:
+        '201':
+          description: Entrega creada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Pedido o repartidor no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/deliveries/{id}:
+    get:
+      tags:
+        - Deliveries
+      summary: Obtener una entrega por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la entrega
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Entrega encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Entrega no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Deliveries
+      summary: Actualizar una entrega
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la entrega
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeliveryInput'
+      responses:
+        '200':
+          description: Entrega actualizada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Entrega no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Deliveries
+      summary: Eliminar una entrega
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la entrega
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Entrega eliminada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Entrega no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/deliveries/check/{city}:
+    get:
+      tags:
+        - Deliveries
+      summary: Verificar disponibilidad de entrega
+      description: Consulta las condiciones climáticas y la disponibilidad de repartidores para determinar si un pedido puede ser entregado.
+      parameters:
+        - name: city
+          in: path
+          required: true
+          description: Ciudad donde se realizará la entrega
+          schema:
+            type: string
+        - name: orderId
+          in: query
+          required: false
+          description: ID del pedido asociado
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Resultado de la verificación de entrega
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '502':
+          description: Error al consultar la información meteorológica
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

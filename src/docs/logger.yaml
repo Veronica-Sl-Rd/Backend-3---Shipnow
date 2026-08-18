@@ -1,0 +1,30 @@
+paths:
+
+  /api/logger/test:
+    get:
+      tags:
+        - Logger
+      summary: Probar los niveles de logging
+      description: |
+        Endpoint interno utilizado para verificar el funcionamiento
+        del sistema de logging de ShipNow.
+
+        Genera mensajes utilizando los niveles debug, http, info,
+        warning, error y fatal.
+
+        Este endpoint es una herramienta de validación y no representa
+        una funcionalidad de negocio.
+      responses:
+        "200":
+          description: Niveles de logging ejecutados correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Todos los niveles de logger fueron ejecutados
