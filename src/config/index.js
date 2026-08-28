@@ -1,8 +1,12 @@
 import dotenv from "dotenv";
 
-dotenv.config();
+dotenv.config({
+    path: process.env.NODE_ENV === "test"
+        ? ".env.test"
+        : ".env"
+});
 
-const requiredEnvVars = ['MONGODB_URI'];
+const requiredEnvVars = ["MONGODB_URI"];
 
 requiredEnvVars.forEach((envVar) => {
     if (!process.env[envVar]) {
@@ -13,7 +17,7 @@ requiredEnvVars.forEach((envVar) => {
 const config = {
     PORT: process.env.PORT,
     MONGODB_URI: process.env.MONGODB_URI,
-    NODE_ENV: process.env.NODE_ENV || 'development',
+    NODE_ENV: process.env.NODE_ENV || "development",
 };
 
 export default config;

@@ -6,13 +6,15 @@ Este proyecto corresponde a las pre-entregas de los Módulos 1, 2, 3, 4 y 5 de B
 
 En el Módulo 1 se refactorizó la API utilizando una arquitectura por capas (Controller - Service - Repository), para las distintas entidades del sistema y centralizando además la configuración del entorno y las constantes de la aplicación.
 
-En el Módulo 2 se incorporó un sistema de mocking, generación de datos de prueba y tests unitarios utilizando Jest, aplicando distintos tipos de dobles de prueba (Mocks, Stubs, Fakes y Data Fixtures). 
+En el Módulo 2 se incorporó un sistema de mocking, generación de datos de prueba y tests unitarios utilizando Jest, aplicando distintos tipos de dobles de prueba (Mocks, Stubs, Fakes y Data Fixtures). Los tests unitarios desarrollados durante este módulo se conservan en `Modulo_2_test/` como referencia de las técnicas de testing aplicadas, mientras que la suite de testing activa del proyecto se encuentra en `test/` y utiliza Mocha, Chai y Supertest.
 
 En el Módulo 3 se incorporó un sistema centralizado de manejo de errores mediante errores personalizados, códigos de error, un diccionario de errores y un middleware global, aplicándolo también al módulo de mocking.
 
 En el Módulo 4 se incorporó un sistema profesional de logging utilizando **Winston**, con distintos niveles de registro, persistencia de logs en archivos, rotación automática y diferenciación del comportamiento según el entorno de ejecución.
 
 En el Módulo 5 se incorporó documentación interactiva de la API utilizando Swagger y OpenAPI, incluyendo schemas reutilizables, documentación de endpoints y respuestas de error.
+
+En el Módulo 6 se incorporaron tests funcionales utilizando **Mocha**, **Chai** y **Supertest**, ejecutados sobre una base de datos exclusiva de testing. Se validan los principales endpoints de Users, Orders, Deliveries, Mocks, Logger y Swagger, incluyendo casos exitosos, errores y rutas inexistentes.
 
 ---
 
@@ -23,6 +25,9 @@ En el Módulo 5 se incorporó documentación interactiva de la API utilizando Sw
 - MongoDB
 - Mongoose
 - Jest
+- Mocha
+- Chai
+- Supertest
 - dotenv
 - cors
 - Winston
@@ -84,18 +89,152 @@ Los **Services** se encargan de realizar las validaciones y reglas de negocio, m
 
 ## Testing
 
+El proyecto cuenta con tests funcionales desarrollados utilizando **Mocha**, **Chai** y **Supertest**.
+
+Los tests permiten verificar el comportamiento real de los endpoints de la aplicación realizando solicitudes HTTP sobre la API y utilizando una base de datos MongoDB exclusiva para el entorno de testing.
+
 Para ejecutar los tests del proyecto:
 
 ```bash
 npm test
 ```
+El script configurado en package.json es:
 
-Los tests fueron desarrollados utilizando Jest y contemplan distintos tipos de dobles de prueba:
+```text
+"test": "cross-env NODE_ENV=test mocha --file ./test/setup.js \"test/**/*.test.js\""
+```
+Al ejecutar los tests se establece automáticamente:
 
-- Mock
-- Stub
-- Fake
-- Data Fixture
+```text
+NODE_ENV=test
+```
+Esto permite utilizar una configuración independiente del entorno de desarrollo.
+
+### Entorno de testing
+
+Las variables específicas para los tests se encuentran en:
+
+```text
+.env.test
+```
+Los tests utilizan una base de datos independiente:
+
+```text
+shipnow_test
+```
+De esta forma, la ejecución de la suite no modifica los datos utilizados durante el desarrollo normal de la aplicación.
+
+La conexión y limpieza de la base de datos se gestionan desde:
+
+```text
+test/setup.js
+```
+Al finalizar la ejecución de los tests, la base de datos utilizada para testing es eliminada y la conexión con MongoDB se cierra.
+
+### Módulos testeados
+
+La suite incluye tests funcionales para los principales módulos de la aplicación.
+
+**Users**
+
+Se validan operaciones como:
+
+- Obtener todos los usuarios.
+- Obtener un usuario por ID.
+- Crear usuarios.
+- Validar datos obligatorios.
+- Impedir la creación de usuarios con rol admin.
+- Detectar emails duplicados.
+- Eliminar usuarios.
+- Manejar usuarios inexistentes.
+
+**Orders**
+
+Se validan operaciones como:
+
+- Obtener todos los pedidos.
+- Obtener un pedido por ID.
+- Crear pedidos.
+- Validar el cálculo automático del total.
+- Validar pedidos sin items.
+- Validar clientes inexistentes.
+- Actualizar pedidos.
+- Cancelar pedidos.
+- Impedir la cancelación de pedidos ya entregados.
+- Eliminar pedidos.
+- Manejar pedidos inexistentes.
+
+**Deliveries**
+
+Se validan operaciones como:
+
+- Obtener todas las entregas.
+- Obtener una entrega por ID.
+- Crear entregas.
+- Validar pedidos inexistentes.
+- Validar repartidores inexistentes.
+- Actualizar entregas.
+- Eliminar entregas.
+- Verificar si una entrega puede realizarse según disponibilidad de repartidores y condiciones climáticas.
+
+**Mocks**
+
+Se validan los endpoints de generación de datos de prueba:
+
+- Generación de usuarios.
+- Generación de pedidos.
+- Generación y persistencia de datos.
+- Validación de cantidades inválidas.
+- Validación de cantidades negativas, iguales a cero o no enteras.
+
+**Logger**
+
+Se valida el endpoint:
+
+```http
+GET /api/logger/test
+```
+
+El test verifica que el endpoint ejecute correctamente los distintos niveles configurados en Winston y devuelva la respuesta esperada.
+
+**Swagger**
+
+Se valida que la documentación Swagger se encuentre disponible mediante:
+
+```http
+GET /api/docs/
+```
+
+y que el servidor entregue correctamente la interfaz Swagger UI.
+
+**Rutas inexistentes**
+
+También se valida el comportamiento global de la aplicación frente a rutas no definidas.
+
+### Datos de prueba
+
+Cada test genera los datos necesarios para ejecutarse, evitando depender de información creada manualmente o de un orden específico de ejecución.
+
+Los tests que requieren usuarios, pedidos o entregas crean previamente los recursos necesarios y utilizan los identificadores generados durante la propia ejecución.
+
+Esto permite mantener una suite controlada y repetible.
+
+### Servicios externos durante testing
+
+Para evitar que los resultados de los tests dependan de servicios externos reales, durante la ejecución con:
+
+```text
+NODE_ENV=test
+```
+se utilizan respuestas controladas para las integraciones externas.
+
+Esto se aplica principalmente a:
+
+- Payment Gateway.
+- Servicio de notificaciones.
+- API meteorológica.
+
+De esta forma, los tests pueden ejecutarse de manera repetible sin depender de conectividad, credenciales externas o disponibilidad de servicios de terceros.
 
 ---
 

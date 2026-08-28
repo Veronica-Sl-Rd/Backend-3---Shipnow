@@ -3,8 +3,27 @@ import usersRepo from '../repositories/users.repository.js';
 import { charge } from '../utils/payment-gateway.js';
 import { sendNotification } from '../utils/notification-service.js';
 import OrdersService from '../services/orders.service.js';
+import config from '../config/index.js';
 
-const ordersService = new OrdersService(ordersRepo, usersRepo, charge, sendNotification);
+const paymentGateway =
+    config.NODE_ENV === 'test'
+        ? {
+            charge: async (amount) => ({
+                success: true,
+                transactionId: 'test-txn',
+                amount
+            })
+        }
+        : { charge };
+
+const notificationService =
+    config.NODE_ENV === 'test'
+        ? {
+            sendNotification: async () => true
+        }
+        : { sendNotification };
+
+const ordersService = new OrdersService(ordersRepo, usersRepo, paymentGateway, notificationService);
 
 class OrdersController {
     async findAll(req, res, next) {

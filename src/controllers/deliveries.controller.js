@@ -4,8 +4,18 @@ import usersRepo from '../repositories/users.repository.js';
 import { getWeather } from '../utils/weather-api.js';
 import DeliveriesService from '../services/deliveries.service.js';
 
+const weatherApi =
+    process.env.NODE_ENV === "test"
+        ? {
+            getWeather: async () => ({
+                condition: "clear",
+                temperature: 22
+            })
+        }
+        : { getWeather };
+
 const deliveriesService = new DeliveriesService(
-    deliveriesRepo, ordersRepo, usersRepo, { getWeather }, usersRepo
+    deliveriesRepo, ordersRepo, usersRepo, weatherApi, usersRepo
 );
 
 class DeliveriesController {

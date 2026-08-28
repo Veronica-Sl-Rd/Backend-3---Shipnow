@@ -3,7 +3,7 @@ import DeliveriesService from '../../src/services/deliveries.service.js';
 import { weatherFixtures } from '../exercise-3/fixtures/delivery.fixture.js';
 import { availableDriver, unavailableDriver } from '../exercise-3/fixtures/driver-fixture.js';
 import { data } from '../tipos-de-mocks/data-fixture.js';
-import { USER_ROLES, DELIVERY_STATUS, DELIVERY_PRIORITY } from '../../src/constants'
+import { USER_ROLES, DELIVERY_STATUS, DELIVERY_PRIORITY } from '../../src/constants/index.js'
 
 const { storm, sunny, rain, snow } = weatherFixtures;
 

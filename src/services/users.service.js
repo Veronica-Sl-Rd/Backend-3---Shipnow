@@ -17,7 +17,7 @@ class UserService {
     }
 
     async create(userData) {
-        const { firstName, lastName, email, password, role } = userData;
+        const { firstName, lastName, email, password, role, city, available, vehicle, documents } = userData;
         if (!firstName || !lastName || !email || !password) {
             throw new CustomError(ERROR_CODES.VALIDATION_ERROR);
         }
@@ -34,11 +34,15 @@ class UserService {
             email,
             password,
             role: role || USER_ROLES.CUSTOMER,
+            city,
+            available,
+            vehicle,
+            documents
         });
     }
 
     async update(id, userData) {
-        const updatedUser = await usersRepository.update(id, userData);
+        const updatedUser = await userRepository.update(id, userData);
         if (!updatedUser) {
             throw new CustomError(ERROR_CODES.USER_NOT_FOUND);
         }
