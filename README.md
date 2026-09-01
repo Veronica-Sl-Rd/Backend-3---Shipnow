@@ -122,6 +122,7 @@ Este archivo no se versiona en el repositorio. Para facilitar la configuración 
 
 ```text
 .env.test.example
+```
 Este archivo contiene las variables necesarias para ejecutar la suite de tests:
 
 - MONGODB_URI
