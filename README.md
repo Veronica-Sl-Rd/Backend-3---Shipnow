@@ -1,12 +1,7 @@
 # ShipNow - API REST desarrollada con Node.js, Express y MongoDB siguiendo una arquitectura por capas
 
 ## Descripción
-
-<<<<<<< HEAD
-Este proyecto corresponde a las pre-entregas de los Módulos 1, 2, 3, 4, 5 y 6 de Backend III (Testing y Escalabilidad).
-=======
 Este proyecto corresponde a las pre-entregas de los Módulos 1, 2, 3, 4, 5, 6 y 7 de Backend III (Testing y Escalabilidad).
->>>>>>> 974782e (pre entrega 7)
 
 En el Módulo 1 se refactorizó la API utilizando una arquitectura por capas (Controller - Service - Repository), para las distintas entidades del sistema y centralizando además la configuración del entorno y las constantes de la aplicación.
 
