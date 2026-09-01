@@ -1,5 +1,41 @@
 import mongoose from 'mongoose';
 
+const proofSchema = new mongoose.Schema(
+    {
+        originalName: {
+            type: String,
+            required: true
+        },
+        filename: {
+            type: String,
+            required: true
+        },
+        path: {
+            type: String,
+            required: true
+        },
+        mimetype: {
+            type: String,
+            required: true
+        },
+        size: {
+            type: Number,
+            required: true
+        },
+        documentType: {
+            type: String,
+            default: "delivery_proof"
+        },
+        uploadedAt: {
+            type: Date,
+            default: Date.now
+        }
+    },
+    {
+        _id: false
+    }
+);
+
 const deliverySchema = new mongoose.Schema({
   order: {
     type: mongoose.Schema.Types.ObjectId,
@@ -27,6 +63,10 @@ const deliverySchema = new mongoose.Schema({
   },
   deliveredAt: {
     type: Date,
+    default: null
+  },
+  proof: {
+    type: proofSchema,
     default: null
   }
 }, {

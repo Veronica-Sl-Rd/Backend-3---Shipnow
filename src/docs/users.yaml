@@ -147,3 +147,111 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+
+  /api/users/{uid}/documents:
+    post:
+      tags:
+        - Users
+      summary: Subir un documento de usuario
+      description: >
+        Permite cargar un documento asociado a un usuario existente.
+        El archivo debe ser JPEG, PNG o PDF y no puede superar los 5 MB.
+      parameters:
+        - in: path
+          name: uid
+          required: true
+          schema:
+            type: string
+          description: ID del usuario
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file, documentType]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Archivo a cargar (JPEG, PNG o PDF)
+                documentType:
+                  type: string
+                  enum: [dni, license, other]
+                  description: Tipo de documento
+      responses:
+        "200":
+          description: Documento cargado correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Documento cargado correctamente
+                  payload:
+                    $ref: "#/components/schemas/User"
+
+        "400":
+          description: Error de validación del archivo o documento
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                fileRequired:
+                  summary: Archivo faltante
+                  value:
+                    status: error
+                    error: FILE_REQUIRED
+                    message: El archivo es obligatorio
+                invalidDocumentType:
+                  summary: Tipo de documento inválido
+                  value:
+                    status: error
+                    error: INVALID_DOCUMENT_TYPE
+                    message: El tipo de documento no es válido
+                invalidFileType:
+                  summary: Tipo de archivo no permitido
+                  value:
+                    status: error
+                    error: INVALID_FILE_TYPE
+                    message: El tipo de archivo no está permitido
+                fileTooLarge:
+                  summary: Archivo demasiado grande
+                  value:
+                    status: error
+                    error: FILE_TOO_LARGE
+                    message: El archivo supera el tamaño máximo permitido
+                invalidFileField:
+                  summary: Campo de archivo incorrecto
+                  value:
+                    status: error
+                    error: INVALID_FILE_FIELD
+                    message: El campo de archivo enviado no es válido
+
+        "404":
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                status: error
+                error: USER_NOT_FOUND
+                message: Usuario no encontrado
+
+        "500":
+          description: Error al guardar el archivo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                status: error
+                error: FILE_UPLOAD_ERROR
+                message: No fue posible guardar el archivo

@@ -24,6 +24,14 @@ export const ERROR_CODES = {
     VALIDATION_ERROR: "VALIDATION_ERROR",
     INTERNAL_SERVER_ERROR: "INTERNAL_SERVER_ERROR",
     NOTIFICATION_FAILED: "NOTIFICATION_FAILED",
+
+    // Archivos
+    FILE_REQUIRED: "FILE_REQUIRED",
+    INVALID_FILE_TYPE: "INVALID_FILE_TYPE",
+    INVALID_FILE_FIELD: "INVALID_FILE_FIELD",
+    FILE_TOO_LARGE: "FILE_TOO_LARGE",
+    INVALID_DOCUMENT_TYPE: "INVALID_DOCUMENT_TYPE",
+    FILE_UPLOAD_ERROR: "FILE_UPLOAD_ERROR",
 };
 
 Object.freeze(ERROR_CODES);
@@ -107,5 +115,35 @@ export const ERROR_DICTIONARY = {
     [ERROR_CODES.NOTIFICATION_FAILED]: {
     statusCode: 502,
     message: "No fue posible enviar la notificación"
+    },
+
+    [ERROR_CODES.FILE_REQUIRED]: {
+    statusCode: 400,
+    message: "El archivo es obligatorio"
+    },
+
+    [ERROR_CODES.INVALID_FILE_TYPE]: {
+        statusCode: 400,
+        message: "El tipo de archivo no está permitido"
+    },
+
+    [ERROR_CODES.INVALID_FILE_FIELD]: {
+    statusCode: 400,
+    message: "El campo de archivo enviado no es válido"
+    },
+
+    [ERROR_CODES.FILE_TOO_LARGE]: {
+        statusCode: 400,
+        message: "El archivo supera el tamaño máximo permitido"
+    },
+
+    [ERROR_CODES.INVALID_DOCUMENT_TYPE]: {
+        statusCode: 400,
+        message: "El tipo de documento no es válido"
+    },
+
+    [ERROR_CODES.FILE_UPLOAD_ERROR]: {
+        statusCode: 500,
+        message: "No fue posible guardar el archivo"
     }
 }

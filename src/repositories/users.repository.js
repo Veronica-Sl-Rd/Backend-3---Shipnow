@@ -32,6 +32,17 @@ class UserRepository {
     async delete(id) {
         return await User.findByIdAndDelete(id);
     }
-}
+
+    async addDocument(id, documentData) {
+        return await User.findByIdAndUpdate(
+            id,
+            {$push: {documents: documentData}},
+            {
+                new: true,
+                runValidators: true
+            }
+        );
+    }
+    }
 
 export default new UserRepository();

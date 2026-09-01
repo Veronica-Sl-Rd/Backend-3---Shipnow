@@ -1,5 +1,41 @@
 import mongoose from 'mongoose';
 
+const documentSchema = new mongoose.Schema(
+    {
+        originalName: {
+            type: String,
+            required: true
+        },
+        filename: {
+            type: String,
+            required: true
+        },
+        path: {
+            type: String,
+            required: true
+        },
+        mimetype: {
+            type: String,
+            required: true
+        },
+        size: {
+            type: Number,
+            required: true
+        },
+        documentType: {
+            type: String,
+            required: true
+        },
+        uploadedAt: {
+            type: Date,
+            default: Date.now
+        }
+    },
+    {
+        _id: false
+    }
+);
+
 const userSchema = new mongoose.Schema({
   firstName: {
     type: String,
@@ -48,12 +84,7 @@ const userSchema = new mongoose.Schema({
   },
   
   documents: {
-    type: [
-      {
-        name: { type: String },
-        reference: { type: String }
-      }
-    ],
+    type: [documentSchema],
     default: []
   }
 }, {

@@ -45,6 +45,22 @@ class UserController {
             next(error);
         }
     }
+    async addDocument(req, res, next) {
+        try {
+            const updatedUser = await userService.addDocument(
+                req.params.uid,
+                req.file,
+                req.body.documentType
+            );
+            res.status(200).json({
+                status: "success",
+                message: "Documento cargado correctamente",
+                payload: updatedUser
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 export default new UserController();

@@ -189,3 +189,103 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
+  /api/deliveries/{id}/proof:
+    post:
+      tags:
+        - Deliveries
+      summary: Subir un comprobante de entrega
+      description: >
+        Permite cargar un comprobante asociado a una entrega existente.
+        El archivo debe ser JPEG, PNG o PDF y no puede superar los 5 MB.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: ID de la entrega
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Comprobante de entrega (JPEG, PNG o PDF)
+
+      responses:
+        "200":
+          description: Comprobante cargado correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Comprobante cargado correctamente
+                  payload:
+                    $ref: "#/components/schemas/Delivery"
+
+        "400":
+          description: Error de validación del archivo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                fileRequired:
+                  summary: Archivo faltante
+                  value:
+                    status: error
+                    error: FILE_REQUIRED
+                    message: El archivo es obligatorio
+                invalidFileType:
+                  summary: Tipo de archivo no permitido
+                  value:
+                    status: error
+                    error: INVALID_FILE_TYPE
+                    message: El tipo de archivo no está permitido
+                fileTooLarge:
+                  summary: Archivo demasiado grande
+                  value:
+                    status: error
+                    error: FILE_TOO_LARGE
+                    message: El archivo supera el tamaño máximo permitido
+                invalidFileField:
+                  summary: Campo de archivo incorrecto
+                  value:
+                    status: error
+                    error: INVALID_FILE_FIELD
+                    message: El campo de archivo enviado no es válido
+
+        "404":
+          description: Entrega no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                status: error
+                error: DELIVERY_NOT_FOUND
+                message: Entrega no encontrada
+
+        "500":
+          description: Error al guardar el archivo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                status: error
+                error: FILE_UPLOAD_ERROR
+                message: No fue posible guardar el archivo

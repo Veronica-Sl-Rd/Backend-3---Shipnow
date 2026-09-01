@@ -5,6 +5,7 @@ import { errorHandler } from './middlewares/errorHandler.js' ;
 import logger from './utils/logger.js';
 import { swaggerSpec } from './docs/swagger.config.js';
 import swaggerUi from "swagger-ui-express"
+import { multerErrorHandler } from "./middlewares/multerErrorHandler.js";
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use((req, res) => {
     res.status(404).json({ status: 'error', message: 'Ruta no encontrada' });
 });
 
+app.use(multerErrorHandler);
 app.use(errorHandler);
 
 export default app;

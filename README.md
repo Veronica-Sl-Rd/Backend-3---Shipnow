@@ -2,7 +2,11 @@
 
 ## Descripción
 
+<<<<<<< HEAD
 Este proyecto corresponde a las pre-entregas de los Módulos 1, 2, 3, 4, 5 y 6 de Backend III (Testing y Escalabilidad).
+=======
+Este proyecto corresponde a las pre-entregas de los Módulos 1, 2, 3, 4, 5, 6 y 7 de Backend III (Testing y Escalabilidad).
+>>>>>>> 974782e (pre entrega 7)
 
 En el Módulo 1 se refactorizó la API utilizando una arquitectura por capas (Controller - Service - Repository), para las distintas entidades del sistema y centralizando además la configuración del entorno y las constantes de la aplicación.
 
@@ -15,6 +19,8 @@ En el Módulo 4 se incorporó un sistema profesional de logging utilizando **Win
 En el Módulo 5 se incorporó documentación interactiva de la API utilizando Swagger y OpenAPI, incluyendo schemas reutilizables, documentación de endpoints y respuestas de error.
 
 En el Módulo 6 se incorporaron tests funcionales utilizando **Mocha**, **Chai** y **Supertest**, ejecutados sobre una base de datos exclusiva de testing. Se validan los principales endpoints de Users, Orders, Deliveries, Mocks, Logger y Swagger, incluyendo casos exitosos, errores y rutas inexistentes.
+
+En el Módulo 7 se incorporó un sistema de carga de archivos, documentos y comprobantes utilizando **Multer** y `multipart/form-data`. Se implementó una configuración centralizada para definir destinos de almacenamiento, nombres únicos, tipos de archivo permitidos y tamaño máximo. Los documentos se asocian a usuarios y los comprobantes a entregas, almacenando en MongoDB únicamente sus metadatos. También se incorporaron validaciones y errores específicos de archivos integrados al sistema centralizado de errores, eliminación de archivos huérfanos ante operaciones fallidas, registro de eventos mediante Winston, documentación Swagger para los nuevos endpoints y tests funcionales de los flujos de carga.
 
 ---
 
@@ -117,6 +123,17 @@ Las variables específicas para los tests se encuentran en:
 ```text
 .env.test
 ```
+Este archivo no se versiona en el repositorio. Para facilitar la configuración del entorno de testing se incluye:
+
+```text
+.env.test.example
+Este archivo contiene las variables necesarias para ejecutar la suite de tests:
+
+- MONGODB_URI
+- PORT
+- NODE_ENV
+
+Para configurar el entorno de testing, se debe copiar .env.test.example como .env.test y completar los valores correspondientes.
 Los tests utilizan una base de datos independiente:
 
 ```text
@@ -124,6 +141,16 @@ shipnow_test
 ```
 De esta forma, la ejecución de la suite no modifica los datos utilizados durante el desarrollo normal de la aplicación.
 
+Las dependencias necesarias para ejecutar los tests se encuentran declaradas localmente en el proyecto, por lo que no requieren instalaciones globales. Luego de instalar las dependencias mediante:
+
+```text
+npm install
+```
+la suite puede ejecutarse con:
+
+```text
+npm test
+```
 La conexión y limpieza de la base de datos se gestionan desde:
 
 ```text
@@ -411,6 +438,131 @@ src/docs/
 ```
 
 Los endpoints se documentan mediante archivos YAML, mientras que swagger-jsdoc se utiliza para generar la especificación OpenAPI y swagger-ui-express permite visualizar y probar la documentación desde el navegador.
+
+--- 
+
+## Carga de archivos, documentos y comprobantes
+
+En este módulo se incorporó la carga de archivos mediante **Multer**, utilizando solicitudes `multipart/form-data` y manteniendo la configuración de uploads separada de los routers.
+
+### Configuración de archivos
+
+La configuración de Multer se encuentra centralizada en:
+
+```text
+src/config/multer.config.js
+```
+
+Desde allí se definen:
+
+- Carpetas de destino para los archivos.
+- Generación de nombres únicos.
+- Tipos MIME permitidos.
+- Tamaño máximo de archivo.
+- Filtros de archivos.
+- Configuración de almacenamiento mediante `diskStorage`.
+
+Los valores reutilizables relacionados con archivos se encuentran centralizados en:
+
+```text
+src/constants/file.constants.js
+```
+
+Los formatos permitidos son:
+
+- JPEG
+- PNG
+- PDF
+
+El tamaño máximo permitido por archivo es de **5 MB**.
+
+Los archivos se almacenan dentro de `uploads/`, directorio excluido del repositorio mediante `.gitignore`.
+
+### Documentos de usuarios
+
+Se incorporó el endpoint:
+
+```http
+POST /api/users/:uid/documents
+```
+Permite asociar un documento a un usuario existente mediante `multipart/form-data`.
+
+La solicitud recibe:
+
+- `file`: archivo a cargar.
+- `documentType`: tipo de documento (`dni`, `license` u `other`).
+
+MongoDB no almacena el contenido del archivo. Únicamente se persisten sus metadatos:
+
+- Nombre original.
+- Nombre generado.
+- Ruta.
+- Tipo MIME.
+- Tamaño.
+- Tipo de documento.
+- Fecha de carga.
+
+### Comprobantes de entrega
+
+Se incorporó el endpoint:
+
+```http
+POST /api/deliveries/:id/proof
+```
+Permite cargar un comprobante y asociarlo a una entrega existente.
+
+El archivo se almacena físicamente en el servidor y la entidad Delivery conserva únicamente los metadatos correspondientes al comprobante.
+
+### Validación y manejo de errores
+
+La carga de archivos se encuentra integrada al sistema centralizado de errores de la aplicación.
+
+Se contemplan, entre otros, los siguientes casos:
+
+- Archivo obligatorio.
+- Tipo de archivo no permitido.
+- Archivo que supera el tamaño máximo.
+- Campo de archivo incorrecto.
+- Tipo de documento inválido.
+- Usuario o entrega inexistente.
+- Error durante la carga del archivo.
+
+Los errores propios de Multer son procesados mediante un middleware específico y posteriormente derivados al manejador global de errores.
+Cuando un archivo ya fue almacenado pero la operación posterior falla, se elimina del servidor para evitar archivos huérfanos.
+
+### Logging
+
+Los eventos relacionados con la carga de archivos se integran al sistema de logging con Winston.
+Se registran tanto operaciones exitosas como errores de carga y validación, incluyendo la asociación de documentos y comprobantes a sus respectivas entidades.
+
+### Documentación
+
+Los endpoints de carga se encuentran documentados mediante **Swagger/OpenAPI**, incluyendo:
+
+- Uso de `multipart/form-data`.
+- Campos requeridos.
+- Archivos binarios.
+- Tipos de documentos permitidos.
+- Respuestas exitosas.
+- Posibles respuestas de error.
+
+La documentación interactiva puede consultarse en:
+
+```http
+GET /api/docs
+```
+### Tests funcionales
+
+Se incorporaron tests funcionales para validar los nuevos flujos de carga utilizando **Mocha**, **Chai** y **Supertest**.
+Los tests contemplan:
+
+- Carga correcta de documentos.
+- Solicitud sin archivo.
+- Tipo de documento inválido.
+- Carga correcta de comprobantes.
+- Asociación de comprobantes a entidades inexistentes.
+
+Los archivos generados durante los tests exitosos se eliminan posteriormente para evitar residuos en el directorio de uploads.
 
 --- 
 

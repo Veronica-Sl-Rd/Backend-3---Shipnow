@@ -38,7 +38,8 @@ components:
         documents:
           type: array
           items:
-            type: object
+            type: 
+              $ref: "#/components/schemas/DocumentMetadata"
             properties:
               name:
                 type: string
@@ -50,6 +51,34 @@ components:
           type: string
           format: date-time
         updatedAt:
+          type: string
+          format: date-time
+
+    DocumentMetadata:
+      type: object
+      properties:
+        originalName:
+          type: string
+          example: dni.pdf
+        filename:
+          type: string
+          example: 1788280000000-458123.pdf
+        path:
+          type: string
+          example: uploads/documents/1788280000000-458123.pdf
+        mimetype:
+          type: string
+          example: application/pdf
+        size:
+          type: integer
+          example: 245821
+        documentType:
+          type: string
+          enum:
+            - dni
+            - license
+            - other
+        uploadedAt:
           type: string
           format: date-time
 
@@ -137,6 +166,8 @@ components:
           type: string
           format: date-time
           nullable: true
+        proof:
+          $ref: "#/components/schemas/DeliveryProof"
         createdAt:
           type: string
           format: date-time
@@ -178,6 +209,32 @@ components:
           format: date-time
           nullable: true
           description: Fecha y hora de entrega
+
+    DeliveryProof:
+      type: object
+      nullable: true
+      properties:
+        originalName:
+          type: string
+          example: comprobante.jpg
+        filename:
+          type: string
+          example: 1788280000000-827364.jpg
+        path:
+          type: string
+          example: uploads/delivery-proofs/1788280000000-827364.jpg
+        mimetype:
+          type: string
+          example: image/jpeg
+        size:
+          type: integer
+          example: 182731
+        documentType:
+          type: string
+          example: delivery_proof
+        uploadedAt:
+          type: string
+          format: date-time
 
     ErrorResponse:
       type: object

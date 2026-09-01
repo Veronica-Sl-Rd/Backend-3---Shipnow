@@ -1,5 +1,7 @@
 import { ERROR_CODES } from '../constants/error.constants.js';
 import CustomError from '../utils/errors.js';
+import { deleteFile } from "../utils/file.utils.js";
+import logger from "../utils/logger.js";
 
 export default class DeliveriesService {
     constructor(deliveriesRepository, ordersRepository, usersRepository, weatherApi, driverRepository) {
@@ -84,5 +86,30 @@ export default class DeliveriesService {
             throw new CustomError(ERROR_CODES.DELIVERY_NOT_FOUND);
         }
         return deleted;
+    }
+
+    async addProof(deliveryId, file) {
+    try {
+        const delivery = await this.deliveriesRepository.findById(deliveryId);
+        if (!delivery) {
+            throw new CustomError(ERROR_CODES.DELIVERY_NOT_FOUND);}
+        if (!file) {
+            throw new CustomError(ERROR_CODES.FILE_REQUIRED);}
+        const proofData = {
+            originalName: file.originalname,
+            filename: file.filename,
+            path: file.path,
+            mimetype: file.mimetype,
+            size: file.size,
+            documentType: "delivery_proof",
+            uploadedAt: new Date()
+        };
+        const updatedDelivery = await this.deliveriesRepository.addProof(deliveryId, proofData);
+        logger.info(`Comprobante asociado correctamente a la entrega ${deliveryId}`);
+        return updatedDelivery;
+        } catch (error) {
+            if (file?.path) {await deleteFile(file.path);}
+            throw error;
+        }
     }
 }

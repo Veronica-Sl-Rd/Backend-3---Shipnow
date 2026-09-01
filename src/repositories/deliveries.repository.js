@@ -24,6 +24,15 @@ class DeliveriesRepository {
     async delete(id) {
         return Delivery.findByIdAndDelete(id);
     }
+
+    async addProof(id, proofData) {
+    return await Delivery.findByIdAndUpdate(id,{proof: proofData},
+        {
+            new: true,
+            runValidators: true
+        }
+    );
+}
 }
 
 export default new DeliveriesRepository();
