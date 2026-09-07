@@ -12,8 +12,25 @@ export default class DeliveriesService {
         this.driverRepository = driverRepository;
     }
 
-    async findAll(filter = {}) {
-        return this.deliveriesRepository.findAll(filter);
+    async findAll(filter = {}, page = 1, limit = 10) {
+        page = Number(page);
+        limit = Number(limit);
+        if (!Number.isInteger(page) || page < 1) {page = 1;}
+        if (!Number.isInteger(limit) || limit < 1) {limit = 10;}
+        if (limit > 100) {limit = 100;}
+
+        const { deliveries, total } =
+            await this.deliveriesRepository.findAll(filter, page, limit);
+            
+        return {
+            deliveries,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit)
+            }
+        };
     }
 
     async findById(id) {

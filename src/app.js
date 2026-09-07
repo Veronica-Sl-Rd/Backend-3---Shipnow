@@ -6,6 +6,7 @@ import logger from './utils/logger.js';
 import { swaggerSpec } from './docs/swagger.config.js';
 import swaggerUi from "swagger-ui-express"
 import { multerErrorHandler } from "./middlewares/multerErrorHandler.js";
+import config from "./config/index.js";
 
 const app = express();
 
@@ -17,8 +18,13 @@ app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use('/api', apiRouter);
 
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+app.get("/api/health", (req, res) => {
+    res.status(200).json({
+        status: "ok",
+        environment: config.NODE_ENV,
+        uptime: process.uptime(),
+        timestamp: new Date().toISOString()
+    });
 });
 
 app.use((req, res) => {

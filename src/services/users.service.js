@@ -7,8 +7,24 @@ import { deleteFile } from "../utils/file.utils.js";
 import logger from "../utils/logger.js";
 
 class UserService {
-    async findAll() {
-        return await userRepository.findAll();
+    async findAll(page = 1, limit = 10) {
+        page = Number(page); 
+        limit = Number(limit);
+        if (!Number.isInteger(page) || page < 1) {page = 1;}
+        if (!Number.isInteger(limit) || limit < 1) {limit = 10;}
+        if (limit > 100) {limit = 100;}
+
+        const { users, total } = await userRepository.findAll(page, limit);
+        
+        return {
+            users,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit)
+            }
+        };
     }
 
     async findById(id) {

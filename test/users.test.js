@@ -35,6 +35,22 @@ describe("Users API", () => {
         expect(response.body.status).to.equal("success");
         expect(response.body).to.have.property("payload");
         expect(response.body.payload).to.be.an("array");
+        expect(response.body).to.have.property("pagination");
+        expect(response.body.pagination).to.have.property("page");
+        expect(response.body.pagination).to.have.property("limit");
+        expect(response.body.pagination).to.have.property("total");
+        expect(response.body.pagination).to.have.property("totalPages");
+    });
+
+    //GET ALL CON PAGINACIÓN
+    it("GET /api/users debería respetar la paginación", async () => {
+        const response = await request(app).get("/api/users?page=1&limit=2");
+
+        expect(response.status).to.equal(200);
+        expect(response.body.payload).to.be.an("array");
+        expect(response.body.payload.length).to.be.at.most(2);
+        expect(response.body.pagination.page).to.equal(1);
+        expect(response.body.pagination.limit).to.equal(2);
     });
 
 

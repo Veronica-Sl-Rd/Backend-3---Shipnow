@@ -1,8 +1,15 @@
 import User from "../models/user.model.js";
 
 class UserRepository {
-    async findAll() {
-        return await User.find();
+    async findAll(page, limit) {
+        const skip = (page - 1) * limit;
+        const [users, total] = await Promise.all([
+            User.find()
+                .skip(skip)
+                .limit(limit),
+            User.countDocuments()
+        ]);
+        return {users, total};
     }
 
     async findById(id) {

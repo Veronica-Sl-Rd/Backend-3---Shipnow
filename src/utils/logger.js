@@ -28,7 +28,7 @@ winston.addColors({
 
 const logger = winston.createLogger({
     levels,
-    level: config.NODE_ENV === "production" ? "info" : "debug",
+    level: config.LOG_LEVEL,
 
     format: combine(
         timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),

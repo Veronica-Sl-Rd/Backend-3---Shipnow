@@ -28,8 +28,13 @@ const ordersService = new OrdersService(ordersRepo, usersRepo, paymentGateway, n
 class OrdersController {
     async findAll(req, res, next) {
         try {
-            const orders = await ordersService.findAll();
-            res.json({ status: 'success', payload: orders });
+            const { page, limit } = req.query;
+            const result = await ordersService.findAll({}, page, limit);
+            res.json({
+                status: 'success',
+                payload: result.orders,
+                pagination: result.pagination
+            });
         } catch (error) {
             next(error);
         }

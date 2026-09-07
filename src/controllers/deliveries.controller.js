@@ -3,9 +3,10 @@ import ordersRepo from '../repositories/orders.repository.js';
 import usersRepo from '../repositories/users.repository.js';
 import { getWeather } from '../utils/weather-api.js';
 import DeliveriesService from '../services/deliveries.service.js';
+import config from "../config/index.js";
 
 const weatherApi =
-    process.env.NODE_ENV === "test"
+    config.NODE_ENV === "test"
         ? {
             getWeather: async () => ({
                 condition: "clear",
@@ -19,10 +20,16 @@ const deliveriesService = new DeliveriesService(
 );
 
 class DeliveriesController {
+
     async findAll(req, res, next) {
         try {
-            const deliveries = await deliveriesService.findAll();
-            res.json({ status: 'success', payload: deliveries });
+            const { page, limit } = req.query;
+            const result = await deliveriesService.findAll({}, page, limit);
+            res.json({
+                status: "success",
+                payload: result.deliveries,
+                pagination: result.pagination
+            });
         } catch (error) {
             next(error);
         }

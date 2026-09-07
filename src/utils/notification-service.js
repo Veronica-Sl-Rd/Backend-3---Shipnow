@@ -1,10 +1,9 @@
 import CustomError from "./errors.js";
 import { ERROR_CODES } from "../constants/error.constants.js";
-
-const NOTIFICATION_API_URL = 'https://api.notifications.com/v1/send';
+import config from "../config/index.js";
 
 export async function sendNotification(userId, message) {
-    const response = await fetch(NOTIFICATION_API_URL, {
+    const response = await fetch(config.NOTIFICATION_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, message })

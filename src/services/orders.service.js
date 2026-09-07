@@ -10,8 +10,24 @@ export default class OrdersService {
         this.notificationService = notificationService;
     }
 
-    async findAll(filter = {}) {
-        return this.ordersRepository.findAll(filter);
+    async findAll(filter = {}, page = 1, limit = 10) {
+        page = Number(page);
+        limit = Number(limit);
+        if (!Number.isInteger(page) || page < 1) {page = 1;}
+        if (!Number.isInteger(limit) || limit < 1) {limit = 10;}
+        if (limit > 100) {limit = 100;}
+
+        const { orders, total } = await this.ordersRepository.findAll(filter, page, limit);
+
+        return {
+            orders,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit)
+            }
+        };
     }
 
     async findById(id) {

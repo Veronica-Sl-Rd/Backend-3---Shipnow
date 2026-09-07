@@ -1,7 +1,7 @@
 # ShipNow - API REST desarrollada con Node.js, Express y MongoDB siguiendo una arquitectura por capas
 
 ## Descripción
-Este proyecto corresponde a las pre-entregas de los Módulos 1, 2, 3, 4, 5, 6 y 7 de Backend III (Testing y Escalabilidad).
+Este proyecto corresponde a las pre-entregas de los Módulos 1, 2, 3, 4, 5, 6, 7 y 8 de Backend III (Testing y Escalabilidad).
 
 En el Módulo 1 se refactorizó la API utilizando una arquitectura por capas (Controller - Service - Repository), para las distintas entidades del sistema y centralizando además la configuración del entorno y las constantes de la aplicación.
 
@@ -16,6 +16,8 @@ En el Módulo 5 se incorporó documentación interactiva de la API utilizando Sw
 En el Módulo 6 se incorporaron tests funcionales utilizando **Mocha**, **Chai** y **Supertest**, ejecutados sobre una base de datos exclusiva de testing. Se validan los principales endpoints de Users, Orders, Deliveries, Mocks, Logger y Swagger, incluyendo casos exitosos, errores y rutas inexistentes.
 
 En el Módulo 7 se incorporó un sistema de carga de archivos, documentos y comprobantes utilizando **Multer** y `multipart/form-data`. Se implementó una configuración centralizada para definir destinos de almacenamiento, nombres únicos, tipos de archivo permitidos y tamaño máximo. Los documentos se asocian a usuarios y los comprobantes a entregas, almacenando en MongoDB únicamente sus metadatos. También se incorporaron validaciones y errores específicos de archivos integrados al sistema centralizado de errores, eliminación de archivos huérfanos ante operaciones fallidas, registro de eventos mediante Winston, documentación Swagger para los nuevos endpoints y tests funcionales de los flujos de carga.
+
+En el Módulo 8 se incorporaron mejoras orientadas a performance, escalabilidad y preparación para producción. Se agregó paginación y control de resultados en los endpoints principales, se amplió la configuración mediante variables de entorno, se incorporó un endpoint de health check y se definió un criterio para restringir endpoints internos en producción. Además, la API fue contenerizada utilizando Docker, mediante un `Dockerfile` y un `.dockerignore`, permitiendo ejecutar ShipNow en un entorno aislado y configurable.
 
 ---
 
@@ -560,6 +562,230 @@ Los tests contemplan:
 
 Los archivos generados durante los tests exitosos se eliminan posteriormente para evitar residuos en el directorio de uploads.
 
---- 
+---
+
+## Performance, producción y Docker
+
+En el Módulo 8 se realizaron ajustes orientados a mejorar la performance de la API, preparar su configuración para distintos entornos y permitir su ejecución mediante Docker.
+
+### Performance
+
+Los endpoints que devuelven colecciones de usuarios, pedidos y entregas cuentan con paginación y límites de resultados para evitar devolver colecciones completas sin control.
+Los parámetros de paginación permiten definir la página y la cantidad de resultados solicitados.
+Ejemplo:
+
+```http
+GET /api/users?page=1&limit=5
+```
+También se mantienen los límites implementados para la carga de archivos mediante Multer, incluyendo:
+
+- Tamaño máximo permitido.
+- Tipos de archivo restringidos.
+- Manejo centralizado de errores de carga.
+- Organización de archivos en subcarpetas.
+- Exclusión de los uploads del repositorio.
+
+De esta forma se evita procesar archivos excesivamente grandes o tipos no permitidos.
+
+---
+
+### Configuración por entorno
+
+La configuración de la aplicación se encuentra centralizada y utiliza variables de entorno para evitar valores sensibles o dependientes del entorno escritos directamente en el código.
+
+El archivo `.env.example` contiene las variables necesarias sin incluir valores sensibles.
+
+Para testing se utiliza una configuración independiente mediante `.env.test` y se incluye `.env.test.example`como referencia para configurar el entorno de pruebas.
+
+Las variables críticas son validadas durante el inicio de la aplicación. Si falta una configuración obligatoria, la API detiene su inicialización mostrando un mensaje indicando la variable faltante.
+
+---
+
+### Servicios externos
+
+Las URLs y credenciales utilizadas por los servicios externos se obtienen desde la configuración centralizada de la aplicación.
+
+Esto se aplica a:
+
+- Payment Gateway.
+- Servicio de notificaciones.
+- API meteorológica.
+
+De esta forma, las URLs y claves necesarias pueden modificarse según el entorno sin alterar el código fuente.
+Durante los tests se mantienen respuestas controladas para evitar depender de servicios externos reales.
+
+---
+
+### Nivel de logging
+
+El nivel de logging también puede configurarse mediante la variable:
+
+```text
+LOG_LEVEL
+```
+Esto permite utilizar diferentes niveles de detalle según el entorno de ejecución.
+
+Por ejemplo:
+
+```text
+development → debug
+test → error
+production → info
+```
+El valor puede modificarse mediante las variables de entorno sin necesidad de realizar cambios en el código.
+
+---
+
+### Health Check
+
+La API incorpora un endpoint de health check:
+
+```http
+GET /api/health
+```
+Este endpoint permite comprobar que la aplicación se encuentra funcionando y devuelve información básica sobre su estado:
+
+```json
+{
+  "status": "ok",
+  "environment": "production",
+  "uptime": 120.5,
+  "timestamp": "2026-09-06T20:00:00.000Z"
+}
+```
+La respuesta no expone credenciales, conexiones a la base de datos ni otra información sensible.
+El health check cuenta además con un test funcional dentro de la suite del proyecto.
+
+---
+
+### Endpoints internos en producción
+
+Se estableció un criterio para los endpoints utilizados exclusivamente durante desarrollo y testing.
+Los siguientes módulos no se exponen cuando:
+
+```text
+NODE_ENV=production
+```
+- `/api/mocks`
+- `/api/logger`
+
+Estos endpoints permanecen disponibles en los entornos de desarrollo y testing.
+Los siguientes endpoints permanecen disponibles también en producción:
+
+```text
+/api/health
+/api/docs
+```
+Swagger se mantiene disponible para permitir consultar y probar la documentación de la API, mientras que el health check permite verificar el estado de la aplicación.
+
+---
+
+## Docker
+
+La aplicación puede ejecutarse dentro de un contenedor Docker.
+El proyecto incluye:
+
+```text
+Dockerfile
+.dockerignore
+```
+El `Dockerfile` utiliza una imagen de Node.js, instala únicamente las dependencias necesarias para producción, copia el código de la aplicación, expone el puerto de la API y ejecuta el script de inicio definido en `package.json`.
+
+### Construir la imagen
+
+Desde la raíz del proyecto:
+
+```bash
+docker build -t shipnow-api .
+```
+Esto genera una imagen llamada:
+
+```text
+shipnow-api
+```
+
+### Variables de entorno para Docker
+
+Las variables de entorno no se incorporan dentro de la imagen.
+Para ejecutar el contenedor pueden proporcionarse desde un archivo externo. Por ejemplo:
+
+```text
+.env.docker
+```
+Este archivo es únicamente local y no debe incluirse en el repositorio.
+Ejemplo de estructura:
+
+```env
+PORT=8080
+MONGODB_URI=
+NODE_ENV=production
+LOG_LEVEL=info
+
+PAYMENT_API_URL=
+PAYMENT_API_KEY=
+NOTIFICATION_API_URL=
+WEATHER_API_URL=
+WEATHER_API_KEY=
+```
+Cuando MongoDB se encuentra ejecutándose localmente en la máquina host y Docker Desktop se utiliza en Windows, la conexión puede realizarse utilizando `host.docker.internal` en lugar de `localhost`.
+
+Ejemplo:
+
+```env
+MONGODB_URI=mongodb://host.docker.internal:27017/shipnow
+```
+
+### Ejecutar el contenedor
+
+Con las variables configuradas en `.env.docker`:
+
+```bash
+docker run --name shipnow-container --env-file .env.docker -p 8080:8080 shipnow-api
+```
+El mapeo:
+
+```text
+8080:8080
+```
+permite acceder desde la máquina host al puerto `8080` expuesto por la aplicación dentro del contenedor.
+Una vez iniciado, la API puede comprobarse mediante:
+
+```text
+http://localhost:8080/api/health
+```
+y la documentación Swagger mediante:
+
+```text
+http://localhost:8080/api/docs
+```
+También pueden utilizarse normalmente los endpoints principales de la API.
+
+### Detener y volver a iniciar el contenedor
+
+Para detener el contenedor:
+
+```bash
+docker stop shipnow-container
+```
+Para volver a iniciarlo:
+
+```bash
+docker start shipnow-container
+```
+Los contenedores existentes pueden consultarse mediante:
+
+```bash
+docker ps -a
+```
+---
+
+### Archivos excluidos de Docker
+
+El archivo `.dockerignore` evita copiar dentro de la imagen archivos y directorios innecesarios o sensibles.
+También se excluyen archivos temporales y archivos de logs.
+Los archivos generados mediante Multer permanecen fuera del repositorio y no se consideran almacenamiento permanente de la aplicación.
+Los logs generados durante la ejecución tampoco forman parte del repositorio.
+
+---
 
 Pre-entrega Backend III - Coderhouse
