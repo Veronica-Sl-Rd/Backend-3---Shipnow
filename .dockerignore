@@ -4,6 +4,7 @@ npm-debug.log
 .env
 .env.test
 .env.docker
+.env.compose
 
 .git
 .gitignore

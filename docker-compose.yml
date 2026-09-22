@@ -1,0 +1,48 @@
+services:
+  mongodb:
+    image: mongo:8
+    restart: unless-stopped
+
+    volumes:
+      - mongo_data:/data/db
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - mongosh --quiet --eval "db.adminCommand('ping').ok" | grep -q 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  api:
+    build: .
+    restart: unless-stopped
+
+    ports:
+      - "8080:8080"
+
+    environment:
+      PORT: "8080"
+      NODE_ENV: production
+      LOG_LEVEL: info
+      MONGODB_URI: mongodb://mongodb:27017/shipnow
+
+      PAYMENT_API_URL: ${PAYMENT_API_URL:?Falta PAYMENT_API_URL}
+      PAYMENT_API_KEY: ${PAYMENT_API_KEY:?Falta PAYMENT_API_KEY}
+      NOTIFICATION_API_URL: ${NOTIFICATION_API_URL:?Falta NOTIFICATION_API_URL}
+      WEATHER_API_URL: ${WEATHER_API_URL:?Falta WEATHER_API_URL}
+      WEATHER_API_KEY: ${WEATHER_API_KEY:?Falta WEATHER_API_KEY}
+
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+    volumes:
+      - uploads_data:/app/uploads
+      - logs_data:/app/logs
+
+volumes:
+  mongo_data:
+  uploads_data:
+  logs_data:

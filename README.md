@@ -1,7 +1,7 @@
 # ShipNow - API REST desarrollada con Node.js, Express y MongoDB siguiendo una arquitectura por capas
 
 ## Descripción
-Este proyecto corresponde a las pre-entregas de los Módulos 1, 2, 3, 4, 5, 6, 7 y 8 de Backend III (Testing y Escalabilidad).
+Este proyecto corresponde a las pre-entregas de los Módulos 1 al 8 y a la entrega final de Backend III (Testing y Escalabilidad).
 
 En el Módulo 1 se refactorizó la API utilizando una arquitectura por capas (Controller - Service - Repository), para las distintas entidades del sistema y centralizando además la configuración del entorno y las constantes de la aplicación.
 
@@ -18,6 +18,8 @@ En el Módulo 6 se incorporaron tests funcionales utilizando **Mocha**, **Chai**
 En el Módulo 7 se incorporó un sistema de carga de archivos, documentos y comprobantes utilizando **Multer** y `multipart/form-data`. Se implementó una configuración centralizada para definir destinos de almacenamiento, nombres únicos, tipos de archivo permitidos y tamaño máximo. Los documentos se asocian a usuarios y los comprobantes a entregas, almacenando en MongoDB únicamente sus metadatos. También se incorporaron validaciones y errores específicos de archivos integrados al sistema centralizado de errores, eliminación de archivos huérfanos ante operaciones fallidas, registro de eventos mediante Winston, documentación Swagger para los nuevos endpoints y tests funcionales de los flujos de carga.
 
 En el Módulo 8 se incorporaron mejoras orientadas a performance, escalabilidad y preparación para producción. Se agregó paginación y control de resultados en los endpoints principales, se amplió la configuración mediante variables de entorno, se incorporó un endpoint de health check y se definió un criterio para restringir endpoints internos en producción. Además, la API fue contenerizada utilizando Docker, mediante un `Dockerfile` y un `.dockerignore`, permitiendo ejecutar ShipNow en un entorno aislado y configurable.
+
+En la entrega final se integraron las funcionalidades desarrolladas durante el curso y se incorporó un Dockerfile multi-stage y una configuración de Docker Compose para ejecutar la API junto con MongoDB. La configuración incluye un healthcheck de MongoDB y volúmenes para persistir los datos, los archivos cargados y los logs.
 
 ---
 
@@ -38,6 +40,9 @@ En el Módulo 8 se incorporaron mejoras orientadas a performance, escalabilidad 
 - OpenAPI
 - swagger-jsdoc
 - swagger-ui-express
+- Multer
+- Docker
+- Docker Compose
 
 ---
 
@@ -785,6 +790,85 @@ El archivo `.dockerignore` evita copiar dentro de la imagen archivos y directori
 También se excluyen archivos temporales y archivos de logs.
 Los archivos generados mediante Multer permanecen fuera del repositorio y no se consideran almacenamiento permanente de la aplicación.
 Los logs generados durante la ejecución tampoco forman parte del repositorio.
+
+---
+
+## Ejecución con Docker Compose
+
+Docker Compose permite iniciar ShipNow y MongoDB mediante una única configuración, sin necesidad de instalar ni ejecutar MongoDB por separado en la máquina host.
+
+El archivo `docker-compose.yml` define dos servicios:
+
+- `mongodb`: base de datos MongoDB, con un healthcheck para verificar que esté disponible.
+- `api`: aplicación ShipNow, que espera a que MongoDB esté disponible antes de iniciarse.
+
+La imagen de la API se construye mediante un `Dockerfile` multi-stage que instala las dependencias de producción en una etapa separada.
+
+### Configurar las variables de entorno
+
+Crear un archivo `.env.compose` en la raíz del proyecto y completar las variables de los servicios externos:
+
+```env
+PAYMENT_API_URL=
+PAYMENT_API_KEY=
+NOTIFICATION_API_URL=
+WEATHER_API_URL=
+WEATHER_API_KEY=
+```
+
+Estas variables deben completarse con los valores correspondientes al entorno de ejecución. El archivo `.env.compose` es local y no debe incluirse en el repositorio.
+Las variables `PORT`, `NODE_ENV`, `MONGODB_URI` y `LOG_LEVEL` se configuran directamente en `docker-compose.yml`.
+Dentro de Docker Compose, la API se conecta a MongoDB mediante el nombre del servicio `mongodb`, en lugar de utilizar `localhost`.
+
+### Construir e iniciar los servicios
+
+Desde la raíz del proyecto, con Docker Desktop en ejecución:
+
+```bash
+docker compose --env-file .env.compose up -d --build
+```
+
+Este comando construye la imagen de ShipNow e inicia los servicios de la API y MongoDB.
+Para consultar el estado de los contenedores:
+
+```bash
+docker compose --env-file .env.compose ps
+```
+
+Para consultar los logs de la API:
+
+```bash
+docker compose --env-file .env.compose logs api
+```
+
+### Comprobar el funcionamiento
+
+Una vez iniciados los servicios, la API está disponible en:
+
+- Health check: http://localhost:8080/api/health
+- Documentación Swagger: http://localhost:8080/api/docs
+
+### Persistencia de datos
+
+Docker Compose utiliza volúmenes para conservar los datos de MongoDB, los archivos cargados mediante Multer y los logs de la aplicación.
+Estos datos no se pierden al detener y volver a iniciar los contenedores.
+
+### Detener los servicios
+
+Para detener y eliminar los contenedores creados por Docker Compose:
+
+```bash
+docker compose --env-file .env.compose down
+```
+
+Este comando no elimina los volúmenes de datos.
+Para volver a iniciar los servicios:
+
+```bash
+docker compose --env-file .env.compose up -d
+```
+
+**Nota:** La API utiliza el puerto `8080`. Si ya está ejecutándose mediante `npm start` u otro contenedor que utiliza ese puerto, es necesario detener esa instancia antes de iniciar Docker Compose.
 
 ---
 
